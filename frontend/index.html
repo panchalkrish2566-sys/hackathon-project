@@ -1523,17 +1523,33 @@ function checkPwdStrength(v){
 }
 function showAuthErr(id,msg){const el=$(id);el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),4000);}
 
+// Demo credentials — for hackathon / presentation use
+const DEMO_USERS = [
+  {email:'arjun@coreinventory.in', password:'password123', name:'Arjun Mehta',   role:'Admin'},
+  {email:'priya@coreinventory.in', password:'password123', name:'Priya Sharma',  role:'Staff'},
+  {email:'raj@coreinventory.in',   password:'password123', name:'Raj Kumar',     role:'Staff'},
+  {email:'krish@coreinventory.in', password:'password123', name:'Krish Panchal', role:'Admin'},
+];
+
 function doLogin(){
   const email=$('l-email').value.trim(), pwd=$('l-pwd').value;
   if(!email||!pwd){showAuthErr('login-err','Please fill in all fields.');return;}
   if(!email.includes('@')){showAuthErr('login-err','Please enter a valid email.');return;}
   const btn=event.target; btn.textContent='Verifying...'; btn.disabled=true;
+
   setTimeout(()=>{
     btn.textContent='Sign in to WareTrack'; btn.disabled=false;
-    const name=email.split('@')[0].replace(/[^a-zA-Z ]/g,' ').split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
-    S.user={name,email,role:'Admin'};
-    // Trigger OTP flow
-    launchOTP(email);
+
+    // Check demo credentials first
+    const demoUser = DEMO_USERS.find(u => u.email === email && u.password === pwd);
+    if(demoUser){
+      S.user = {name: demoUser.name, email: demoUser.email, role: demoUser.role};
+      enterApp();
+      return;
+    }
+
+    // Wrong credentials
+    showAuthErr('login-err','Invalid email or password. Use demo credentials to sign in.');
   },900);
 }
 function doSignup(){
@@ -1547,7 +1563,7 @@ function doSignup(){
   setTimeout(()=>{
     btn.textContent='Create account'; btn.disabled=false;
     S.user={name:`${fn} ${ln}`,email,role:role.charAt(0).toUpperCase()+role.slice(1)};
-    launchOTP(email);
+    enterApp();
   },900);
 }
 function doForgot(){
